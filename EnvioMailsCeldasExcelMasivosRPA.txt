@@ -1,0 +1,454 @@
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+
+ 
+
+ 
+
+Sub Pending_Paments()
+
+Dim Plaza As String
+
+Dim Seguimiento As Integer
+
+Dim Firm As String
+
+ 
+
+'Fijamos la Plaza
+
+Sheets("PENDIENTES").Select
+
+Range("B200").Select
+
+Selection.End(xlUp).Select
+
+Plaza = ActiveCell
+
+ 
+
+Sheets("PENDIENTES").Select
+
+Range("J200").Select
+
+Selection.End(xlUp).Select
+
+Seguimiento = ActiveCell + 1
+
+ 
+
+'Limpiamos la zona de envio del mail
+
+Sheets("FormatoEnvioMail").Activate
+
+Range("A1").Select
+
+Range(Selection, Selection.End(xlToRight)).Select
+
+Range(Selection, Selection.End(xlDown)).Select
+
+Selection.Delete
+
+ 
+
+'Hacemos el traspaso del rango que deseamos enviar
+
+Sheets("PENDIENTES").Select
+
+Range("A1").Select
+
+Range("A1:J1").Select
+
+Range(Selection, Selection.End(xlDown)).Select
+
+Selection.SpecialCells(xlCellTypeVisible).Select
+
+Selection.Copy
+
+Sheets("FormatoEnvioMail").Activate
+
+Range("A1").Select
+
+ActiveSheet.Paste
+
+Application.CutCopyMode = False
+
+Selection.EntireColumn.AutoFit
+
+   
+
+    ' Show the envelope on the ActiveWorkbook.
+
+    ActiveWorkbook.EnvelopeVisible = True
+
+   
+
+    'Llamamos al envío...
+
+    With ActiveSheet.MailEnvelope
+
+ 
+
+   Sheets("FormatoEnvioMail").Activate
+
+   Range("C200").Select
+
+   Selection.End(xlUp).Select
+
+Mails (ActiveCell)
+
+Sleep 3000
+
+ 
+
+   
+
+     .Item.To = Sheets("Programacion").Range("Z1").Value
+
+  
+
+     .Item.CC = ggxom005@avon.com
+
+ 
+
+   '.Item.bcc = ""      'con copia oculta a...
+
+ 
+
+    .Item.Subject = "Recordatorio Cierre de Zona - " & Plaza & " Seguimiento No." _
+
+    & Seguimiento
+
+    .Introduction = "Buen día Estimados," & vbNewLine & " Les comento que al día de hoy la siguiente zona se encuentra con cierre realizado. Se verifico en SOS y aun cuenta con Payment Pending, por lo que agradeceré aclaración de los mismos." & vbNewLine _
+
+& vbNewLine & "Porteo Team" _
+
+& vbNewLine & "Procces Deveeloper"
+
+    .Item.Send
+
+        End With
+
+End Sub
+Sub SeleciondePending()
+
+Dim Columnas, Contador, NumeroC2, CF, NumeroC, NumeroS, Seguimiento, NS As Integer
+
+Dim Direciones_Correos, cero As String
+
+Dim Tiempo As Double
+
+Dim Aux As Integer
+
+ 
+
+ 
+
+Aux = InputBox("Ingrese el # de Auxiliar a trabajar ", "Steph Help")
+
+ 
+
+ 
+
+If Aux <> 20 And Aux <> 22 And Aux <> 23 And Aux <> 25 And Aux <> 26 And Aux <> 27 Then
+
+    MsgBox "Numero de Aux incorrecto", vbOKOnly, "Steph Help"
+
+    Exit Sub
+
+End If
+
+ 
+
+ 
+
+ 
+
+        'Antes filtramos por celdas vacias y agregamos el 0
+
+        Sheets("PENDIENTES").Select
+
+        Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter
+
+       
+
+        Seguimiento = Sheets("PENDIENTES").Range("A1").CurrentRegion.Rows.Count
+
+   
+
+For NS = 2 To Seguimiento
+
+ 
+
+       If Range("J" & NS).Value = "" Then
+
+            Range("J" & NS).Value = "0"
+
+       End If
+
+      
+
+Next NS
+
+       
+
+        
+
+        
+
+        
+
+        'Antes de empezar a enviar los pendientes limpiamos pendientes que ya cumplan los 3 seguimientos pues estos _
+        pasaran a otro proceso
+
+        Sheets("PENDIENTES").Select
+
+        Range("A1").Select
+
+        Selection.AutoFilter
+
+        Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter Field:=10, Criteria1:="3"
+
+        Range("A200").Select
+
+        Selection.End(xlUp).Select
+
+   If ActiveCell <> "AUXILIAR" Then
+
+   
+
+        Range("A1").Select
+
+        Range(Selection, Selection.End(xlDown)).Select
+
+        Range(Selection, Selection.End(xlToRight)).Select
+
+        Selection.EntireRow.Delete
+
+        Range("A1").EntireRow.Select
+
+        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+
+       
+
+        'Como borramos los encabezados volvemos a ponerlos
+
+        Range("A1").Value = "AUXILIAR"
+
+        Range("B1").Value = "PLAZA"
+
+        Range("C1").Value = "CEDIS."
+
+        Range("D1").Value = "ZONA"
+
+        Range("E1").Value = "CAMPAÑA"
+
+        Range("F1").Value = "ULTIMO DIA EN BODEGA"
+
+        Range("G1").Value = "DIA ADICIONAL"
+
+        Range("H1").Value = "FECHA DE RENDICION EN SP"
+
+        Range("I1").Value = "PENDIENTES"
+
+        Range("J1").Value = "SEGUIMIENTOS"
+
+        Range("K1").Value = "STATUS"
+
+       Sheets("Programacion").Range("Z1").Copy
+
+        Range("A1:K1").PasteSpecial xlPasteFormats
+
+        Application.CutCopyMode = False
+
+        Sheets("PENDIENTES").Range("A1").Select
+
+        Selection.AutoFilter
+
+   Else
+
+        'Nada
+
+   End If
+
+       
+
+        CF = Sheets("LDC").Range("A4").CurrentRegion.Rows.Count - 1
+
+For Contador = 5 To CF
+
+        Sheets("PENDIENTES").Select
+
+        Range("A1").Select
+
+        Selection.AutoFilter
+
+        Selection.AutoFilter
+
+        Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter Field:=1, Criteria1:=Aux
+
+        Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter Field:=3, Criteria1:=Sheets("LDC").Range("A" & Contador).Value
+
+For NumeroC = cero & 1 To 20
+
+        NumeroC2 = NumeroC
+
+        NumeroC = VBA.Format(NumeroC2, "00")
+
+        Sheets("PENDIENTES").Select
+
+        ActiveSheet.Range("$A$1:$K$1").AutoFilter Field:=5
+
+        ActiveSheet.Range("$A$1:$K$1").AutoFilter Field:=10
+
+        Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter Field:=5, Criteria1:=NumeroC
+
+        Range("A200").Select
+
+        Selection.End(xlUp).Select
+
+    If ActiveCell = "AUXILIAR" Then
+
+        'Nada
+
+    Else
+
+For NumeroS = 0 To 3
+
+        Sheets("PENDIENTES").Select
+
+         ActiveSheet.Range("$A$1:$K$1").AutoFilter Field:=10
+
+        Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter Field:=10, Criteria1:=NumeroS
+
+        Range("A200").Select
+
+        Selection.End(xlUp).Select
+
+    If ActiveCell = "AUXILIAR" Then
+
+       'Nada
+
+    Else
+    
+    'Mandamos a llamar la macro para enviar los mails
+
+        Call Module2.Pending_Paments
+
+    End If
+
+Next NumeroS
+
+    End If
+
+Next NumeroC
+
+Next Contador
+
+   
+
+        Seguimiento = Sheets("PENDIENTES").Range("A1").CurrentRegion.Rows.Count
+
+   
+
+For NS = 2 To Seguimiento
+
+       If Range("A" & NS).Value = Aux Then
+
+       Range("J" & NS).Value = Range("J" & NS).Value + 1
+
+       End If
+
+      
+
+Next NS
+
+   
+
+    'Ajustamos algunos cambios esteticos
+
+    Range("J200").Select
+
+    Selection.End(xlUp).Select
+
+    ActiveCell.Clear
+
+    
+
+    Sheets("Programacion").Select
+
+    Rows("1:1").Select
+
+    Selection.RowHeight = 35
+
+       
+
+        Sheets("PENDIENTES").Select
+
+        Range("A1").Value = "AUXILIAR"
+
+        Range("B1").Value = "PLAZA"
+
+        Range("C1").Value = "CEDIS."
+
+        Range("D1").Value = "ZONA"
+
+        Range("E1").Value = "CAMPAÑA"
+
+        Range("F1").Value = "ULTIMO DIA EN BODEGA"
+
+        Range("G1").Value = "DIA ADICIONAL"
+
+        Range("H1").Value = "FECHA DE RENDICION EN SP"
+
+        Range("I1").Value = "PENDIENTES"
+
+        Range("J1").Value = "SEGUIMIENTOS"
+
+        Range("K1").Value = "STATUS"
+
+        Sheets("Programacion").Range("Z1").Copy
+
+        Range("A1:K1").PasteSpecial xlPasteFormats
+
+        Application.CutCopyMode = False
+
+        Range("A1").Select
+
+        Selection.AutoFilter
+
+   
+
+    Sheets("PENDIENTES").Range("$A$1:$K$1").AutoFilter
+
+    Sheets("PENDIENTES").Select
+
+    Range("A1").Select
+
+  
+
+    
+
+    
+
+    
+
+        MsgBox "Un placer poder ayudarle con sus pendientes :), Trabajaremos en mas proyectos para ahorrarle tiempo", vbOKOnly, "Steph Help"
+
+ 
+
+End Sub
+
+ 
+
+Function Mails(Cedis)
+
+Dim Correos As String
+
+     Sheets("Programacion").Range("Z1") = Application.WorksheetFunction.VLookup(ActiveCell, Sheets("LDC").Range("$A$1:$AJ$51"), 36, 0)
+
+     Mails = Sheets("Programacion").Range("Z1").Value
+
+   
+
+End Function
+
